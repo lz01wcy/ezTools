@@ -1,0 +1,11 @@
+HowManyDaysThatLogsShouldSave = 30 #存储多少天,之前的会drop table
+LogModelChanSize = 65536 #越大越不会锁死
+GRPCPort = 12345 #需要与客户端配置一致
+HowOftenToInsertDBInSeconds = 1 #距离上一次入库x秒后再次入库
+HowManyLogsToInsertDBOnce = 8192 #攒够x条消息则入库
+[MySQLConf]
+Host='125.74.195.228'
+Port='6033'
+Account='dbadmin'
+PasswordBase64Str='git不要上传密码!'
+DatabaseName='accio_logs'
