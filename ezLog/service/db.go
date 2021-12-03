@@ -43,10 +43,9 @@ func startDBWritingThread() (err error) {
 	if err != nil {
 		return err
 	}
-	if err = _creatTable(db); err != nil {
+	if err = _creatTable(&db); err != nil {
 		return err
 	}
-
 	howManyLogsToInsertDBOnce := ezLSConfig.HowManyLogsToInsertDBOnce
 	tickerToWrite := time.NewTicker(time.Second * time.Duration(ezLSConfig.HowOftenToInsertDBInSeconds))
 	now := time.Now()
@@ -56,8 +55,8 @@ func startDBWritingThread() (err error) {
 	timer := time.NewTimer(next.Sub(time.Now()))
 	go func() {
 		<-timer.C
-		tickerToNewTable.Reset(time.Hour * 24)
-		if err = _creatTable(db); err != nil {
+		tickerToNewTable.Reset(time.Second * 5)
+		if err = _creatTable(&db); err != nil {
 			fmt.Printf("第一次建表失败,错误信息:%s", err.Error())
 		}
 	}()
@@ -86,7 +85,7 @@ func startDBWritingThread() (err error) {
 			if e := db.Exec(fmt.Sprintf("drop table if exists %s", toDelTableName)).Error; e != nil {
 				fmt.Printf("删除表失败了!错误:\n\t%s\n", e.Error())
 			}
-			if err = _creatTable(db); err != nil {
+			if err = _creatTable(&db); err != nil {
 				return err
 			}
 			break
@@ -98,9 +97,13 @@ func startDBWritingThread() (err error) {
 func _getTableName(t time.Time) string {
 	return fmt.Sprintf("logs_of_%d_%02d_%02d", t.Year(), t.Month(), t.Day())
 }
-func _creatTable(db *gorm.DB) error {
-	if !db.Migrator().HasTable(&logModel{}) {
-		if err := db.Migrator().CreateTable(&logModel{}); err != nil {
+func _creatTable(db **gorm.DB) error {
+	sc := (*db).Scopes(func(db *gorm.DB) *gorm.DB {
+		return db.Table(_getTableName(time.Now()))
+	})
+	*db = sc
+	if !sc.Migrator().HasTable(&logModel{}) {
+		if err := sc.Migrator().CreateTable(&logModel{}); err != nil {
 			return fmt.Errorf("db table create failed with err:%s", err.Error())
 		}
 	}
