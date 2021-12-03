@@ -55,7 +55,7 @@ func startDBWritingThread() (err error) {
 	timer := time.NewTimer(next.Sub(time.Now()))
 	go func() {
 		<-timer.C
-		tickerToNewTable.Reset(time.Second * 5)
+		tickerToNewTable.Reset(time.Hour * 24)
 		if err = _creatTable(&db); err != nil {
 			fmt.Printf("第一次建表失败,错误信息:%s", err.Error())
 		}
