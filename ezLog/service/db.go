@@ -98,11 +98,12 @@ func _getTableName(t time.Time) string {
 	return fmt.Sprintf("logs_of_%d_%02d_%02d", t.Year(), t.Month(), t.Day())
 }
 func _creatTable(db **gorm.DB) error {
+	tableName := _getTableName(time.Now())
 	sc := (*db).Scopes(func(db *gorm.DB) *gorm.DB {
-		return db.Table(_getTableName(time.Now()))
+		return db.Table(tableName)
 	})
 	*db = sc
-	if !sc.Migrator().HasTable(&logModel{}) {
+	if !sc.Migrator().HasTable(tableName) {
 		if err := sc.Migrator().CreateTable(&logModel{}); err != nil {
 			return fmt.Errorf("db table create failed with err:%s", err.Error())
 		}
