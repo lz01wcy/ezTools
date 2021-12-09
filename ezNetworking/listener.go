@@ -7,7 +7,7 @@ import (
 	"syscall"
 )
 
-func ListenUDP4(port int, sendBufferSize int, recvBufferSize int) (*net.UDPConn, error) {
+func ListenUDP(port int, sendBufferSize int, recvBufferSize int) (*net.UDPConn, error) {
 	lc := net.ListenConfig{Control: func(network, address string, c syscall.RawConn) error {
 		if sendBufferSize > 0 {
 			err := setIOBufferSize(c, sendBufferSize, syscall.SO_SNDBUF)
@@ -23,13 +23,13 @@ func ListenUDP4(port int, sendBufferSize int, recvBufferSize int) (*net.UDPConn,
 		}
 		return nil
 	}}
-	l, err := lc.ListenPacket(context.Background(), "udp4", fmt.Sprintf(":%d", port))
+	l, err := lc.ListenPacket(context.Background(), "udp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return nil, err
 	}
 	return l.(*net.UDPConn), nil
 }
-func ListenTCP4(port int, sendBufferSize int, recvBufferSize int) (*net.TCPListener, error) {
+func ListenTCP(port int, sendBufferSize int, recvBufferSize int) (*net.TCPListener, error) {
 	lc := net.ListenConfig{Control: func(network, address string, c syscall.RawConn) error {
 		if sendBufferSize > 0 {
 			err := setIOBufferSize(c, sendBufferSize, syscall.SO_SNDBUF)
@@ -45,7 +45,7 @@ func ListenTCP4(port int, sendBufferSize int, recvBufferSize int) (*net.TCPListe
 		}
 		return nil
 	}}
-	l, err := lc.Listen(context.Background(), "tcp4", fmt.Sprintf(":%d", port))
+	l, err := lc.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return nil, err
 	}
