@@ -3,7 +3,7 @@ syntax = "proto3";
 
 option go_package = "github.com/Anveena/ezLog/ezLogPB";
 
-message LogReq {
+message EZLogReq {
     //https://developers.google.com/protocol-buffers/docs/proto3#scalar 大老师没有一种能对应go的int的.操
     int32 level = 1;
     int32 file_line = 2;
@@ -13,7 +13,7 @@ message LogReq {
     string tag = 6;
     string content = 7;
 }
-message Empty {}
+message EZLogEmpty {}
 service EzLogGrpc {
-    rpc Log(stream LogReq) returns (Empty) {}
+    rpc Log(stream EZLogReq) returns (EZLogEmpty) {}
 }

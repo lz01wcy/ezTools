@@ -21,6 +21,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.3 // indirect
-	golang.org/x/net v0.0.0-20211206223403-eba003a116a9 // indirect
-	google.golang.org/genproto v0.0.0-20211206220100-3cb06788ce7f // indirect
+	golang.org/x/net v0.0.0-20211208012354-db4efeb81f4b // indirect
+	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
 )

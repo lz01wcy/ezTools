@@ -61,7 +61,7 @@ func ezlog(level int32, msg ...interface{}) {
 		return
 	}
 	_, file, line, _ := runtime.Caller(2)
-	logChannel <- &ezLogPB.LogReq{
+	logChannel <- &ezLogPB.EZLogReq{
 		Level:    level,
 		FileLine: int32(line),
 		Time:     time.Now().UnixMicro(),
@@ -75,7 +75,7 @@ func ezlogWithTag(level int32, tag string, msg ...interface{}) {
 		return
 	}
 	_, file, line, _ := runtime.Caller(2)
-	logChannel <- &ezLogPB.LogReq{
+	logChannel <- &ezLogPB.EZLogReq{
 		Level:    level,
 		FileLine: int32(line),
 		Time:     time.Now().UnixMicro(),

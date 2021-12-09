@@ -53,7 +53,7 @@ var (
 	dingMobiles       []string
 	gRPCURL           string
 	gRPCClientCounts  int
-	logChannel        = make(chan *ezLogPB.LogReq)
+	logChannel        = make(chan *ezLogPB.EZLogReq)
 )
 
 type dingRequestModel struct {

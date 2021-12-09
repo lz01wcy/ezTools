@@ -29,7 +29,7 @@ type server struct {
 
 func (s *server) Log(logServer ezLogPB.EzLogGrpc_LogServer) error {
 	runtime.LockOSThread()
-	lm := new(ezLogPB.LogReq)
+	lm := new(ezLogPB.EZLogReq)
 	var err error
 	for {
 		err = logServer.RecvMsg(lm)

@@ -39,8 +39,8 @@ func (c *ezLogGrpcClient) Log(ctx context.Context, opts ...grpc.CallOption) (EzL
 }
 
 type EzLogGrpc_LogClient interface {
-	Send(*LogReq) error
-	CloseAndRecv() (*Empty, error)
+	Send(*EZLogReq) error
+	CloseAndRecv() (*EZLogEmpty, error)
 	grpc.ClientStream
 }
 
@@ -48,15 +48,15 @@ type ezLogGrpcLogClient struct {
 	grpc.ClientStream
 }
 
-func (x *ezLogGrpcLogClient) Send(m *LogReq) error {
+func (x *ezLogGrpcLogClient) Send(m *EZLogReq) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *ezLogGrpcLogClient) CloseAndRecv() (*Empty, error) {
+func (x *ezLogGrpcLogClient) CloseAndRecv() (*EZLogEmpty, error) {
 	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
-	m := new(Empty)
+	m := new(EZLogEmpty)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -96,8 +96,8 @@ func _EzLogGrpc_Log_Handler(srv interface{}, stream grpc.ServerStream) error {
 }
 
 type EzLogGrpc_LogServer interface {
-	SendAndClose(*Empty) error
-	Recv() (*LogReq, error)
+	SendAndClose(*EZLogEmpty) error
+	Recv() (*EZLogReq, error)
 	grpc.ServerStream
 }
 
@@ -105,12 +105,12 @@ type ezLogGrpcLogServer struct {
 	grpc.ServerStream
 }
 
-func (x *ezLogGrpcLogServer) SendAndClose(m *Empty) error {
+func (x *ezLogGrpcLogServer) SendAndClose(m *EZLogEmpty) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *ezLogGrpcLogServer) Recv() (*LogReq, error) {
-	m := new(LogReq)
+func (x *ezLogGrpcLogServer) Recv() (*EZLogReq, error) {
+	m := new(EZLogReq)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
