@@ -3,10 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/Anveena/ezTools/ezLog/ezLogPB"
 	"github.com/Anveena/ezTools/ezPasswordEncoder"
 	_ "github.com/go-sql-driver/mysql"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -44,31 +44,45 @@ func startDBWritingThread() {
 		}
 	}()
 	i := 0
-	msgArr := make([]*ezLogPB.EZLogReq, howManyLogsToInsertDBOnce)
 	for {
 		i = 0
+		sb := strings.Builder{}
+		sb.WriteString(insertSQL)
+		var dataArr []interface{}
 	outer:
 		for ; i < howManyLogsToInsertDBOnce; i++ {
 			select {
 			case <-tickerToWrite.C:
 				break outer
-			case msgArr[i] = <-logModelChan:
+			case m := <-logModelChan:
+				sb.WriteString("(?,?,?,?,?,?,?),")
+				dataArr = append(dataArr, m.Level, m.AppName, m.FileName, m.FileLine, m.Tag, m.Time.AsTime(), m.Content)
 				break
 			}
 		}
 		if i > 0 {
-			stmtIns, err := db.Prepare(insertSQL) // ? = placeholder
+			tx, err := db.Begin()
 			if err != nil {
-				fmt.Printf("插入数据失败了!错误:\n\t%s\n", err.Error())
+				fmt.Printf("创建事务失败!错误:\n\t%s\n", err.Error())
 			}
-			for j := 0; j < i; j++ {
-				if _, err = stmtIns.Exec(msgArr[j].Level, msgArr[j].AppName, msgArr[j].FileName, msgArr[j].FileLine, msgArr[j].Tag, msgArr[j].Time.AsTime(), msgArr[j].Content); err != nil {
-					fmt.Printf("插入数据失败了!错误:\n\t%s\n", err.Error())
-					break
+			sqlStr := sb.String()
+			sqlStr = sqlStr[:len(sqlStr)-1]
+			stmtIns, err := tx.Prepare(sqlStr)
+			if err != nil {
+				fmt.Printf("创建stmt失败了!错误:\n\t%s\n", err.Error())
+				_ = tx.Rollback()
+			} else {
+				if _, err = stmtIns.Exec(dataArr...); err != nil {
+					fmt.Printf("stmt执行失败了!错误:\n\t%s\n", err.Error())
+					_ = tx.Rollback()
+				} else {
+					if err = stmtIns.Close(); err != nil {
+						fmt.Printf("插入数据失败了!错误:\n\t%s\n", err.Error())
+						_ = tx.Rollback()
+					} else {
+						_ = tx.Commit()
+					}
 				}
-			}
-			if err = stmtIns.Close(); err != nil {
-				fmt.Printf("插入数据失败了!错误:\n\t%s\n", err.Error())
 			}
 		}
 		select {
@@ -110,6 +124,6 @@ func _creatTable(db *sql.DB, insertSQL *string) error {
 			")", tableName)); err != nil {
 		return err
 	}
-	*insertSQL = fmt.Sprintf("insert into `%s` (level, name, file, line, tag, time, content) values (?,?,?,?,?,?,?)", tableName)
+	*insertSQL = fmt.Sprintf("insert into `%s` (level, name, file, line, tag, time, content) values ", tableName)
 	return nil
 }
