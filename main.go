@@ -27,12 +27,15 @@ func main() {
 			a,
 		},
 	})
+	i := uint64(0)
 	for {
 		s := time.Now()
-		for i := 0; i < 100; i++ {
+		for j := 0; j < 10000; j++ {
+			i++
 			ezLog.D("hello", "world")
 			ezLog.DWithTag("hello", "world", i)
 		}
 		println(time.Now().Sub(s).String())
+		//time.Sleep(12345*time.Millisecond)
 	}
 }

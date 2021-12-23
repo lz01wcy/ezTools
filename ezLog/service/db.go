@@ -1,50 +1,33 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"github.com/Anveena/ezTools/ezLog/ezLogPB"
 	"github.com/Anveena/ezTools/ezPasswordEncoder"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	_ "github.com/go-sql-driver/mysql"
 	"runtime"
 	"time"
 )
 
-type logModel struct {
-	ID       int64     `gorm:"column:id;comment:无意义;autoIncrement;primaryKey"`
-	Level    int32     `gorm:"colum:lv;comment:日志等级:1-debug,2-info,3-err,4-ding,5-ding_list,6-ding_all;index:tag_with_level_of_app,priority:2"`
-	AppName  string    `gorm:"type:char(32);column:from;comment:App名字;index:file_name_of_app_query,priority:2;index:file_line_of_app_query,priority:2;index:tag_with_level_of_app,priority:3"`
-	FileName string    `gorm:"type:char(255);column:file;comment:代码文件;index:file_name_of_app_query,priority:1"`
-	FileLine int32     `gorm:"column:line;comment:代码行;index:file_line_of_app_query,priority:1"`
-	Tag      string    `gorm:"type:char(127);column:tag;comment:日志标签;index:tag_with_level_of_app,priority:1"`
-	Time     time.Time `gorm:"column:time;comment:日志时间"`
-	Content  string    `gorm:"type:text(2048);column:content;comment:具体日志"`
-}
-
-func (lm *logModel) UpdateToDB() {
-	logModelChan <- lm
-}
-func (lm *logModel) TableName() string {
-	return _getTableName(time.Now())
-}
-func startDBWritingThread() (err error) {
+func startDBWritingThread() {
 	runtime.LockOSThread()
 	if ezLSConfig.MySQLConf.PasswordBase64Str == "" {
-		return fmt.Errorf("MySQL未配置密码")
+		panic(fmt.Errorf("MySQL未配置密码"))
 	}
-	var password string
-	password, err = ezPasswordEncoder.GetPasswordFromEncodedStr(ezLSConfig.MySQLConf.PasswordBase64Str)
+	password, err := ezPasswordEncoder.GetPasswordFromEncodedStr(ezLSConfig.MySQLConf.PasswordBase64Str)
 	if err != nil {
-		return fmt.Errorf("MySQL密码解析不出来,错误信息:%s", err.Error())
+		panic(fmt.Errorf("MySQL密码解析不出来,错误信息:%s", err.Error()))
 	}
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		ezLSConfig.MySQLConf.Account, password, ezLSConfig.MySQLConf.Host, ezLSConfig.MySQLConf.Port, ezLSConfig.MySQLConf.DatabaseName)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.Default.LogMode(logger.Silent)})
-	if err != nil {
-		return err
-	}
-	if err = _creatTable(&db); err != nil {
-		return err
+	db, err := sql.Open("mysql", dsn)
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+	insertSQL := ""
+	if err = _creatTable(db, &insertSQL); err != nil {
+		panic(fmt.Errorf("建表失败,错误信息:%s", err.Error()))
 	}
 	howManyLogsToInsertDBOnce := ezLSConfig.HowManyLogsToInsertDBOnce
 	tickerToWrite := time.NewTicker(time.Second * time.Duration(ezLSConfig.HowOftenToInsertDBInSeconds))
@@ -56,12 +39,12 @@ func startDBWritingThread() (err error) {
 	go func() {
 		<-timer.C
 		tickerToNewTable.Reset(time.Hour * 24)
-		if err = _creatTable(&db); err != nil {
-			fmt.Printf("第一次建表失败,错误信息:%s", err.Error())
+		if err = _creatTable(db, &insertSQL); err != nil {
+			fmt.Printf("建表失败,错误信息:%s", err.Error())
 		}
 	}()
 	i := 0
-	msgArr := make([]*logModel, howManyLogsToInsertDBOnce)
+	msgArr := make([]*ezLogPB.EZLogReq, howManyLogsToInsertDBOnce)
 	for {
 		i = 0
 	outer:
@@ -74,19 +57,29 @@ func startDBWritingThread() (err error) {
 			}
 		}
 		if i > 0 {
-			if e := db.Create(msgArr[:i]).Error; e != nil {
-				fmt.Printf("插入数据失败了!错误:\n\t%s\n", e.Error())
+			stmtIns, err := db.Prepare(insertSQL) // ? = placeholder
+			if err != nil {
+				fmt.Printf("插入数据失败了!错误:\n\t%s\n", err.Error())
+			}
+			for j := 0; j < i; j++ {
+				if _, err = stmtIns.Exec(msgArr[j].Level, msgArr[j].AppName, msgArr[j].FileName, msgArr[j].FileLine, msgArr[j].Tag, msgArr[j].Time.AsTime(), msgArr[j].Content); err != nil {
+					fmt.Printf("插入数据失败了!错误:\n\t%s\n", err.Error())
+					break
+				}
+			}
+			if err = stmtIns.Close(); err != nil {
+				fmt.Printf("插入数据失败了!错误:\n\t%s\n", err.Error())
 			}
 		}
 		select {
 		case <-tickerToNewTable.C:
 			toDelDate := time.Now().Add(-time.Hour * 23 * time.Duration(ezLSConfig.HowManyDaysThatLogsShouldSave))
 			toDelTableName := _getTableName(toDelDate)
-			if e := db.Exec(fmt.Sprintf("drop table if exists %s", toDelTableName)).Error; e != nil {
+			if _, e := db.Exec(fmt.Sprintf("drop table if exists %s", toDelTableName)); e != nil {
 				fmt.Printf("删除表失败了!错误:\n\t%s\n", e.Error())
 			}
-			if err = _creatTable(&db); err != nil {
-				return err
+			if err = _creatTable(db, &insertSQL); err != nil {
+				fmt.Printf("建表失败,错误信息:%s", err.Error())
 			}
 			break
 		default:
@@ -97,16 +90,26 @@ func startDBWritingThread() (err error) {
 func _getTableName(t time.Time) string {
 	return fmt.Sprintf("logs_of_%d_%02d_%02d", t.Year(), t.Month(), t.Day())
 }
-func _creatTable(db **gorm.DB) error {
+func _creatTable(db *sql.DB, insertSQL *string) error {
 	tableName := _getTableName(time.Now())
-	sc := (*db).Scopes(func(db *gorm.DB) *gorm.DB {
-		return db.Table(tableName)
-	})
-	*db = sc
-	if !sc.Migrator().HasTable(tableName) {
-		if err := sc.Migrator().CreateTable(&logModel{}); err != nil {
-			return fmt.Errorf("db table create failed with err:%s", err.Error())
-		}
+	if _, err := db.Exec(fmt.Sprintf(
+		"create table if not exists `%s`"+
+			"("+
+			"    `id`      bigint auto_increment comment '无意义',"+
+			"    `level`   int comment '日志等级:1-debug,2-info,3-err,4-ding,5-ding_list,6-ding_all',"+
+			"    `name`    char(32) comment 'app名字',"+
+			"    `file`    char(255) comment '代码文件',"+
+			"    `line`    int comment '代码行',"+
+			"    `tag`     char(127) comment '日志标签',"+
+			"    `time`    datetime(3) null comment '日志时间',"+
+			"    `content` text(2048) comment '具体日志',"+
+			"    primary key (`id`),"+
+			"    index tag_with_level_of_app (`tag`, `level`, `name`),"+
+			"    index file_name_of_app_query (`file`, `name`),"+
+			"    index file_line_of_app_query (`line`, `name`)"+
+			")", tableName)); err != nil {
+		return err
 	}
+	*insertSQL = fmt.Sprintf("insert into `%s` (level, name, file, line, tag, time, content) values (?,?,?,?,?,?,?)", tableName)
 	return nil
 }

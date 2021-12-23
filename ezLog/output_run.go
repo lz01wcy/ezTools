@@ -10,6 +10,7 @@ import (
 	"github.com/Anveena/ezTools/ezHash"
 	"github.com/Anveena/ezTools/ezLog/ezLogPB"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -64,7 +65,7 @@ func ezlog(level int32, msg ...interface{}) {
 	logChannel <- &ezLogPB.EZLogReq{
 		Level:    level,
 		FileLine: int32(line),
-		Time:     time.Now().UnixMicro(),
+		Time:     timestamppb.New(time.Now()),
 		FileName: file,
 		AppName:  appName,
 		Content:  fmt.Sprint(msg...),
@@ -78,7 +79,7 @@ func ezlogWithTag(level int32, tag string, msg ...interface{}) {
 	logChannel <- &ezLogPB.EZLogReq{
 		Level:    level,
 		FileLine: int32(line),
-		Time:     time.Now().UnixMicro(),
+		Time:     timestamppb.New(time.Now()),
 		FileName: file,
 		AppName:  appName,
 		Tag:      tag,

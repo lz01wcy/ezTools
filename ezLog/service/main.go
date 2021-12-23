@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/Anveena/ezTools/ezConfig"
+	"github.com/Anveena/ezTools/ezLog/ezLogPB"
 	"github.com/Anveena/ezTools/ezMySQL"
 )
 
@@ -15,30 +16,14 @@ type ezLogServiceConfig struct {
 }
 
 var ezLSConfig = &ezLogServiceConfig{}
-var logModelChan chan *logModel
+var logModelChan chan *ezLogPB.EZLogReq
 
 func main() {
 	if err := ezConfig.ReadConf(ezLSConfig); err != nil {
 		println(err.Error())
 		return
 	}
-	logModelChan = make(chan *logModel, ezLSConfig.LogModelChanSize)
-	failed := make(chan bool, 10)
-	go func() {
-		defer func() {
-			failed <- true
-		}()
-		if err := startDBWritingThread(); err != nil {
-			println(err.Error())
-		}
-	}()
-	go func() {
-		defer func() {
-			failed <- true
-		}()
-		if err := startGRPCService(); err != nil {
-			println(err.Error())
-		}
-	}()
-	<-failed
+	logModelChan = make(chan *ezLogPB.EZLogReq, ezLSConfig.LogModelChanSize)
+	go startDBWritingThread()
+	startGRPCService()
 }

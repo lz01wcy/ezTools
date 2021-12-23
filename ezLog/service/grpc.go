@@ -1,26 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"github.com/Anveena/ezTools/ezLog/ezLogPB"
 	"github.com/Anveena/ezTools/ezNetworking"
 	"google.golang.org/grpc"
-	"log"
 	"runtime"
-	"time"
 )
 
-func startGRPCService() error {
-	lis, err := ezNetworking.ListenTCP4(ezLSConfig.GRPCPort, -1, -1)
+func startGRPCService() {
+	lis, err := ezNetworking.ListenTCP(ezLSConfig.GRPCPort, -1, -1)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		panic(fmt.Errorf("监听tcp连接失败:%s", err.Error()))
 	}
 	s := grpc.NewServer()
 	ezLogPB.RegisterEzLogGrpcServer(s, &server{})
-	log.Printf("server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	if err = s.Serve(lis); err != nil {
+		panic(fmt.Errorf("grpc服务启动失败:%s", err.Error()))
 	}
-	return nil
 }
 
 type server struct {
@@ -29,22 +26,14 @@ type server struct {
 
 func (s *server) Log(logServer ezLogPB.EzLogGrpc_LogServer) error {
 	runtime.LockOSThread()
-	lm := new(ezLogPB.EZLogReq)
 	var err error
 	for {
+		lm := new(ezLogPB.EZLogReq)
 		err = logServer.RecvMsg(lm)
 		if err != nil {
 			println(err.Error())
 			return nil
 		}
-		logModelChan <- &logModel{
-			Level:    lm.Level,
-			AppName:  lm.AppName,
-			FileName: lm.FileName,
-			FileLine: lm.FileLine,
-			Tag:      lm.Tag,
-			Time:     time.UnixMicro(lm.Time),
-			Content:  lm.Content,
-		}
+		logModelChan <- lm
 	}
 }

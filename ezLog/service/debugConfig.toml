@@ -4,8 +4,8 @@ GRPCPort = 12345 #需要与客户端配置一致
 HowOftenToInsertDBInSeconds = 1 #距离上一次入库x秒后再次入库
 HowManyLogsToInsertDBOnce = 8192 #攒够x条消息则入库
 [MySQLConf]
-Host='125.74.195.228'
-Port='6033'
-Account='dbadmin'
-PasswordBase64Str='git不要上传密码!'
-DatabaseName='accio_logs'
+Host='localhost'
+Port='3306'
+Account='root'
+PasswordBase64Str='8FNdkbFImC2tar2r5Oe7eg=='
+DatabaseName='test_log'

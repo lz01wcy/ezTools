@@ -1,6 +1,7 @@
 package ezRedis
 
 import (
+	"context"
 	"fmt"
 	"github.com/Anveena/ezTools/ezPasswordEncoder"
 	"github.com/go-redis/redis/v8"
@@ -23,7 +24,7 @@ func NewRedisClient(redisInfo *Info) (*redis.Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("密码配的不合适,需要一个神秘的字符串才能解析,错误:\n\t%s", err.Error())
 	}
-	return redis.NewClient(&redis.Options{
+	rs := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", redisInfo.Host, redisInfo.Port),
 		Username: redisInfo.UserName,
 		Password: password,
@@ -33,5 +34,6 @@ func NewRedisClient(redisInfo *Info) (*redis.Client, error) {
 		//var numCPU = runtime.GOMAXPROCS(0)
 		MinIdleConns: runtime.GOMAXPROCS(0) * 8,
 		PoolSize:     runtime.GOMAXPROCS(0) * 10,
-	}), nil
+	})
+	return rs, rs.Ping(context.Background()).Err()
 }
