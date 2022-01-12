@@ -32,10 +32,8 @@ func NewDBEngine(dbInfo *Info, dbModels ...interface{}) (*gorm.DB, error) {
 		return nil, err
 	}
 	for _, ptr := range dbModels {
-		if !db.Migrator().HasTable(ptr) {
-			if err := db.Migrator().CreateTable(ptr); err != nil {
-				return nil, fmt.Errorf("建表失败!错误:\n\t%s", err.Error())
-			}
+		if err := db.Migrator().AutoMigrate(ptr); err != nil {
+			return nil, fmt.Errorf("建表失败!错误:\n\t%s", err.Error())
 		}
 	}
 	return db, nil
