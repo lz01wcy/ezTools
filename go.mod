@@ -7,6 +7,7 @@ require (
 	github.com/beevik/ntp v0.3.0
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/go-sql-driver/mysql v1.6.0
+	gocv.io/x/gocv v0.29.0
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d
 	golang.org/x/text v0.3.7
 	google.golang.org/grpc v1.42.0
