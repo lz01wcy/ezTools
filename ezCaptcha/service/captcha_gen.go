@@ -43,8 +43,13 @@ func genFormula() (int, int, *operator) {
 
 // Bottom-left corner of the text string in the image.https://docs.opencv.org/4.x/d6/d6e/group__imgproc__draw.html#ga5126f47f883d730f633d74f07456c576
 func genLocation(xPadding, maxX, maxY int, str string) image.Point {
-	size := gocv.GetTextSize("/", gocv.FontHersheyScriptComplex, 1, 4)
-	x := rand.Intn(maxX-size.X) + xPadding
+	size := gocv.GetTextSize(str, gocv.FontHersheyScriptComplex, 1, 4)
+	var x int
+	if maxX-size.X <= 0 {
+		x = xPadding
+	} else {
+		x = rand.Intn(maxX-size.X) + xPadding
+	}
 	y := rand.Intn(maxY-size.Y) + size.Y
 	return image.Point{
 		X: x,
