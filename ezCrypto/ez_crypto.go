@@ -79,6 +79,39 @@ func AESCBCDecrypt(encData []byte, key []byte) (_ []byte, err error) {
 	origData = freedomUnPadding(origData)
 	return origData, nil
 }
+func AESGCMEncrypt(origData []byte, key []byte) (_ []byte, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("很严重的错误呢,差点duang了%v", e)
+		}
+	}()
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	return gcm.Seal(nil, key[8:20], origData, nil), nil
+}
+func AESGCMDecrypt(encData []byte, key []byte) (_ []byte, err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("很严重的错误呢,差点duang了%v", e)
+		}
+	}()
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	return gcm.Open(nil, key[8:20], encData, nil)
+}
 func EZEncrypt(origData []byte, ezKey string, salt uint64) (_ []byte, err error) {
 	defer func() {
 		if e := recover(); e != nil {
