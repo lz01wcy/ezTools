@@ -35,13 +35,13 @@ func startGRPCClient() {
 	}()
 	clientConn, err := grpc.Dial(gRPCURL, grpc.WithInsecure())
 	if err != nil {
-		errMsg = err.Error()
+		errMsg = fmt.Sprintf("grpc拨号错误:%s", err.Error())
 		return
 	}
 	grpcClient := ezLogPB.NewEzLogGrpcClient(clientConn)
 	stream, err := grpcClient.Log(ctx)
 	if err != nil {
-		errMsg = err.Error()
+		errMsg = fmt.Sprintf("grpc方法调用错误:%s", err.Error())
 		return
 	}
 	// It is safe to have a goroutine calling SendMsg and another goroutine
@@ -52,7 +52,7 @@ func startGRPCClient() {
 	for {
 		msg := <-logChannel
 		if err = stream.Send(msg); err != nil {
-			errMsg = err.Error()
+			errMsg = fmt.Sprintf("发送失败:%s,文件:%s,行号:%d,消息内容:%s", err.Error(), msg.FileName, msg.FileLine, msg.Content)
 			return
 		}
 	}
