@@ -114,7 +114,7 @@ func _creatTable(db *sql.DB, insertSQL *string) error {
 			"    `name`    char(32) comment 'app名字',"+
 			"    `file`    char(255) comment '代码文件',"+
 			"    `line`    int comment '代码行',"+
-			"    `tag`     char(127) comment '日志标签',"+
+			"    `tag`     char(255) comment '日志标签',"+
 			"    `time`    datetime(3) null comment '日志时间',"+
 			"    `content` text(2048) comment '具体日志',"+
 			"    primary key (`id`),"+
