@@ -52,7 +52,7 @@ func startGRPCClient() {
 	for {
 		msg := <-logChannel
 		if err = stream.Send(msg); err != nil {
-			errMsg = fmt.Sprintf("发送失败:%s,文件:%s,行号:%d,消息内容:%s", err.Error(), msg.FileName, msg.FileLine, msg.Content)
+			errMsg = fmt.Sprintf("发送失败:%s\n文件:%s\n行号:%d\n消息内容:\n%s", err.Error(), msg.FileName, msg.FileLine, msg.Content)
 			return
 		}
 	}
