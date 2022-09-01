@@ -3,7 +3,7 @@ module github.com/Anveena/ezTools
 go 1.19
 
 require (
-	github.com/BurntSushi/toml v1.1.0
+	github.com/BurntSushi/toml v1.2.0
 	github.com/beevik/ntp v0.3.0
 	github.com/go-redis/redis/v9 v9.0.0-beta.1
 	github.com/go-sql-driver/mysql v1.6.0
@@ -12,8 +12,8 @@ require (
 	golang.org/x/text v0.3.7
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
-	gorm.io/driver/mysql v1.3.4
-	gorm.io/gorm v1.23.5
+	gorm.io/driver/mysql v1.3.6
+	gorm.io/gorm v1.23.8
 )
 
 require (
