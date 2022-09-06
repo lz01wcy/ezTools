@@ -6,20 +6,25 @@ import (
 	"github.com/beevik/ntp"
 )
 
-var timestamPadding int64
+var timestampPadding int64
+var defaultNTPServer = "ntp2.aliyun.com"
 
-func SyncTimeFromAliyun() error {
+func SetupNTPServer(addr string) error {
+	defaultNTPServer = addr
+	return SyncTimeFromNTPServer()
+}
+func SyncTimeFromNTPServer() error {
 	t1 := time.Now().UnixMilli()
-	t2, err := ntp.Time("ntp2.aliyun.com")
+	t2, err := ntp.Time(defaultNTPServer)
 	if err != nil {
 		return err
 	}
-	timestamPadding = t2.UnixMilli() - t1
+	timestampPadding = t2.UnixMilli() - t1
 	return nil
 }
-func GetAliyunTimestamp() uint64 {
-	return uint64(time.Now().UnixMilli() + timestamPadding)
+func GetFixedTimestamp() uint64 {
+	return uint64(time.Now().UnixMilli() + timestampPadding)
 }
-func GetAliyunTime() time.Time {
-	return time.Now().Add(time.Millisecond * time.Duration(timestamPadding))
+func GetFixedTime() time.Time {
+	return time.Now().Add(time.Millisecond * time.Duration(timestampPadding))
 }
