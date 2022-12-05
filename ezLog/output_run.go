@@ -58,13 +58,13 @@ func startGRPCClient() {
 		}
 	}
 }
-func ezlog(level int32, msg ...interface{}) {
+func Log(level LogLv, msg ...interface{}) {
 	if level < logLevel {
 		return
 	}
 	_, file, line, _ := runtime.Caller(2)
 	logChannel <- &ezLogPB.EZLogReq{
-		Level:    level,
+		Level:    int32(level),
 		FileLine: int32(line),
 		Time:     timestamppb.New(time.Now()),
 		FileName: file,
@@ -72,13 +72,13 @@ func ezlog(level int32, msg ...interface{}) {
 		Content:  fmt.Sprint(msg...),
 	}
 }
-func ezlogWithTag(level int32, tag string, msg ...interface{}) {
+func LogWithTag(level LogLv, tag string, msg ...interface{}) {
 	if level < logLevel {
 		return
 	}
 	_, file, line, _ := runtime.Caller(2)
 	logChannel <- &ezLogPB.EZLogReq{
-		Level:    level,
+		Level:    int32(level),
 		FileLine: int32(line),
 		Time:     timestamppb.New(time.Now()),
 		FileName: file,
@@ -87,7 +87,7 @@ func ezlogWithTag(level int32, tag string, msg ...interface{}) {
 		Content:  fmt.Sprint(msg...),
 	}
 }
-func sendToDing(logLv int32, tag string, msg string) {
+func sendToDing(logLv LogLv, tag string, msg string) {
 	_, file, line, _ := runtime.Caller(2)
 	fileSubArr := strings.SplitN(file, "/src/", 2)
 	if len(fileSubArr) == 2 {

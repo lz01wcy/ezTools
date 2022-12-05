@@ -8,8 +8,10 @@ import (
 	"strings"
 )
 
+type LogLv int32
+
 const (
-	LogLvDebug = int32(iota + 1)
+	LogLvDebug = LogLv(iota + 1)
 	LogLvInfo
 	LogLvError
 	LogLvDingMessage
@@ -17,13 +19,13 @@ const (
 	LogLvDingAll
 )
 
-var lvHeaderMap = map[int32]string{
-	LogLvDebug:       "\n[Debug] ",
-	LogLvInfo:        "\n[Info]  ",
-	LogLvError:       "\n[Error] ",
-	LogLvDingMessage: "\n[Ding]  ",
-	LogLvDingLists:   "\n[DAL!]  ",
-	LogLvDingAll:     "\n[DAA!]  ",
+var lvHeaderMap = map[LogLv]string{
+	LogLvDebug:       "\n[Debug]  ",
+	LogLvInfo:        "\n[Info]   ",
+	LogLvError:       "\n[Error]  ",
+	LogLvDingMessage: "\n[Ding]   ",
+	LogLvDingLists:   "\n[DAL!]   ",
+	LogLvDingAll:     "\n[DAA!]   ",
 }
 var logFmtStr = "%sFile:%s%sLine:%d%s%s\n"
 
@@ -70,7 +72,7 @@ type dingRequestModel struct {
 
 func SetUpEnv(m *EZLoggerModel) {
 	appName = m.AppName
-	logLevel = m.LogLevel
+	logLevel = LogLv(m.LogLevel)
 	enableDing = m.DingTalkModel.Enable
 	if appName == "" {
 		panic(fmt.Sprintf("AppName必须要配置,不然无法区分对应的服务"))
@@ -116,56 +118,56 @@ func SetUpEnv(m *EZLoggerModel) {
 	}
 }
 func D(msg ...interface{}) {
-	ezlog(LogLvDebug, msg...)
+	Log(LogLvDebug, msg...)
 }
 func I(msg ...interface{}) {
-	ezlog(LogLvInfo, msg...)
+	Log(LogLvInfo, msg...)
 }
 func E(msg ...interface{}) {
-	ezlog(LogLvError, msg...)
+	Log(LogLvError, msg...)
 }
 func DingMessage(msg ...interface{}) {
-	ezlog(LogLvDingMessage, msg...)
+	Log(LogLvDingMessage, msg...)
 	if enableDing {
 		sendToDing(LogLvDingMessage, "no tag", fmt.Sprintln(msg...))
 	}
 }
 func DingAtAll(msg ...interface{}) {
-	ezlog(LogLvDingAll, msg...)
+	Log(LogLvDingAll, msg...)
 	if enableDing {
 		sendToDing(LogLvDingAll, "no tag", fmt.Sprintln(msg...))
 	}
 }
 func DingList(msg ...interface{}) {
-	ezlog(LogLvDingLists, msg...)
+	Log(LogLvDingLists, msg...)
 	if enableDing {
 		sendToDing(LogLvDingLists, "no tag", fmt.Sprintln(msg...))
 	}
 }
 
 func DWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvDebug, tag, msg...)
+	LogWithTag(LogLvDebug, tag, msg...)
 }
 func IWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvInfo, tag, msg...)
+	LogWithTag(LogLvInfo, tag, msg...)
 }
 func EWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvError, tag, msg...)
+	LogWithTag(LogLvError, tag, msg...)
 }
 func DingMessageWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvDingMessage, tag, msg...)
+	LogWithTag(LogLvDingMessage, tag, msg...)
 	if enableDing {
 		sendToDing(LogLvDingMessage, tag, fmt.Sprintln(msg...))
 	}
 }
 func DingAtAllWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvDingAll, tag, msg...)
+	LogWithTag(LogLvDingAll, tag, msg...)
 	if enableDing {
 		sendToDing(LogLvDingAll, tag, fmt.Sprintln(msg...))
 	}
 }
 func DingListWithTag(tag string, msg ...interface{}) {
-	ezlogWithTag(LogLvDingLists, tag, msg...)
+	LogWithTag(LogLvDingLists, tag, msg...)
 	if enableDing {
 		sendToDing(LogLvDingLists, tag, fmt.Sprintln(msg...))
 	}
