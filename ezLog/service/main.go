@@ -19,10 +19,7 @@ var ezLSConfig = &ezLogServiceConfig{}
 var logModelChan chan *ezLogPB.EZLogReq
 
 func main() {
-	if err := ezConfig.ReadConf(ezLSConfig); err != nil {
-		println(err.Error())
-		return
-	}
+	ezConfig.ReadConf(ezLSConfig)
 	logModelChan = make(chan *ezLogPB.EZLogReq, ezLSConfig.LogModelChanSize)
 	go startDBWritingThread()
 	startGRPCService()

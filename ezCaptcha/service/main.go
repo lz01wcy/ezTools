@@ -94,13 +94,11 @@ const (
 	width  = 200
 )
 
-//防止被爆破炸内存.
+// 防止被爆破炸内存.
 var imageChannel chan gocv.Mat
 
 func main() {
-	if err := ezConfig.ReadConf(captchaConfig); err != nil {
-		panic(err)
-	}
+	ezConfig.ReadConf(captchaConfig)
 	if err := captchaConfig.Check(); err != nil {
 		panic(err)
 	}

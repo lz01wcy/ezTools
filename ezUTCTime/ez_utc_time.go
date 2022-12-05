@@ -7,11 +7,11 @@ import (
 )
 
 var timestampPadding int64
-var defaultNTPServer = "ntp2.aliyun.com"
+var defaultNTPServer = "ntp1.aliyun.com"
 
-func SetupNTPServer(addr string) error {
+func SetupNTPServer(addr string) {
 	defaultNTPServer = addr
-	return SyncTimeFromNTPServer()
+	return
 }
 func SyncTimeFromNTPServer() error {
 	t1 := time.Now().UnixMilli()

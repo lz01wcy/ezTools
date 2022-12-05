@@ -10,8 +10,9 @@ import (
 	"github.com/Anveena/ezTools/ezHash"
 	"github.com/Anveena/ezTools/ezLog/ezLogPB"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"runtime"
@@ -33,7 +34,7 @@ func startGRPCClient() {
 			<-logChannel
 		}
 	}()
-	clientConn, err := grpc.Dial(gRPCURL, grpc.WithInsecure())
+	clientConn, err := grpc.Dial(gRPCURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		errMsg = fmt.Sprintf("grpc拨号错误:%s", err.Error())
 		return
@@ -131,7 +132,7 @@ func sendToDing(logLv int32, tag string, msg string) {
 			E(err.Error())
 			return
 		}
-		rspInfo, _ := ioutil.ReadAll(rsp.Body)
+		rspInfo, _ := io.ReadAll(rsp.Body)
 		rspStr := string(rspInfo)
 		if !strings.Contains(rspStr, `"errcode":0,`) {
 			E("rsp from ding:", rspStr)

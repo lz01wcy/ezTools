@@ -68,27 +68,28 @@ type dingRequestModel struct {
 	} `json:"at"`
 }
 
-func SetUpEnv(m *EZLoggerModel) (err error) {
+func SetUpEnv(m *EZLoggerModel) {
 	appName = m.AppName
 	logLevel = m.LogLevel
 	enableDing = m.DingTalkModel.Enable
 	if appName == "" {
-		return fmt.Errorf("AppName必须要配置,不然无法区分对应的服务")
+		panic(fmt.Sprintf("AppName必须要配置,不然无法区分对应的服务"))
 	}
+	var err error
 	if enableDing {
 		if m.DingTalkModel.URLEncodedString == "" {
-			return fmt.Errorf("钉钉的那个URL没配置")
+			panic(fmt.Sprintf("钉钉的那个URL没配置"))
 		}
 		dingURL, err = ezPasswordEncoder.GetPasswordFromEncodedStr(m.DingTalkModel.URLEncodedString)
 		if err != nil {
-			return
+			panic(fmt.Sprintf("获取密码错误:%s", err.Error()))
 		}
 		if m.DingTalkModel.SecretKeyEncodedString == "" {
-			return fmt.Errorf("钉钉的那个SecretKey没配置")
+			panic(fmt.Sprintf("钉钉的那个SecretKey没配置"))
 		}
 		dingSecretKey, err = ezPasswordEncoder.GetPasswordFromEncodedStr(m.DingTalkModel.SecretKeyEncodedString)
 		if err != nil {
-			return
+			panic(fmt.Sprintf("获取密码错误:%s", err.Error()))
 		}
 		dingSecretKeyData = []byte(dingSecretKey)
 		dingMobiles = m.DingTalkModel.Mobiles
@@ -103,17 +104,16 @@ func SetUpEnv(m *EZLoggerModel) (err error) {
 	gRPCClientCounts = m.GRPCModel.ClientCounts
 	if gRPCClientCounts > 0 {
 		if m.GRPCModel.URLEncodedString == "" {
-			return fmt.Errorf("gRPC日志服务没配地址")
+			panic(fmt.Sprintf("gRPC日志服务没配地址"))
 		}
 		gRPCURL, err = ezPasswordEncoder.GetPasswordFromEncodedStr(m.GRPCModel.URLEncodedString)
 		if err != nil {
-			return
+			panic(fmt.Sprintf("获取密码错误:%s", err.Error()))
 		}
 		for i := 0; i < gRPCClientCounts; i++ {
 			go startGRPCClient()
 		}
 	}
-	return nil
 }
 func D(msg ...interface{}) {
 	ezlog(LogLvDebug, msg...)
