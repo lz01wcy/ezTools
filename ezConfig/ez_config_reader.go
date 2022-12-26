@@ -8,7 +8,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-func ReadConf(configModel interface{}) {
+func ReadConf(configModel Checkable) {
 	confPath := ""
 	flag.StringVar(&confPath, "c", "", "Config toml File Path")
 	flag.Parse()
@@ -22,5 +22,6 @@ func ReadConf(configModel interface{}) {
 	if err = toml.Unmarshal(tomlData, configModel); err != nil {
 		panic(fmt.Sprintf("toml解析错误:%s", err.Error()))
 	}
+	configModel.Check()
 	return
 }
