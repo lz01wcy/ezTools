@@ -164,7 +164,7 @@ func file_ezCaptchaPB_proto_rawDescGZIP() []byte {
 }
 
 var file_ezCaptchaPB_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_ezCaptchaPB_proto_goTypes = []interface{}{
+var file_ezCaptchaPB_proto_goTypes = []any{
 	(*EZCaptchaRsp)(nil),   // 0: EZCaptchaRsp
 	(*EZCaptchaEmpty)(nil), // 1: EZCaptchaEmpty
 }
@@ -184,7 +184,7 @@ func file_ezCaptchaPB_proto_init() {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_ezCaptchaPB_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_ezCaptchaPB_proto_msgTypes[0].Exporter = func(v any, i int) any {
 			switch v := v.(*EZCaptchaRsp); i {
 			case 0:
 				return &v.state
@@ -196,7 +196,7 @@ func file_ezCaptchaPB_proto_init() {
 				return nil
 			}
 		}
-		file_ezCaptchaPB_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_ezCaptchaPB_proto_msgTypes[1].Exporter = func(v any, i int) any {
 			switch v := v.(*EZCaptchaEmpty); i {
 			case 0:
 				return &v.state

@@ -48,7 +48,7 @@ func startDBWritingThread() {
 		i = 0
 		sb := strings.Builder{}
 		sb.WriteString(insertSQL)
-		var dataArr []interface{}
+		var dataArr []any
 	outer:
 		for ; i < howManyLogsToInsertDBOnce; i++ {
 			select {

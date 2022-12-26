@@ -15,7 +15,7 @@ type Info struct {
 	DatabaseName      string
 }
 
-func NewDBEngine(dbInfo *Info, gormConfig *gorm.Config, dbModels ...interface{}) *gorm.DB {
+func NewDBEngine(dbInfo *Info, gormConfig *gorm.Config, dbModels ...any) *gorm.DB {
 	if dbInfo.PasswordBase64Str == "" {
 		panic("密码没配置")
 	}

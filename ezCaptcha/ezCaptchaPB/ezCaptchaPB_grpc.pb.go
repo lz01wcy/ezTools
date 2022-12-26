@@ -70,7 +70,7 @@ func RegisterEZCaptchaServiceServer(s grpc.ServiceRegistrar, srv EZCaptchaServic
 	s.RegisterService(&EZCaptchaService_ServiceDesc, srv)
 }
 
-func _EZCaptchaService_GetCaptcha_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _EZCaptchaService_GetCaptcha_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(EZCaptchaEmpty)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func _EZCaptchaService_GetCaptcha_Handler(srv interface{}, ctx context.Context, 
 		Server:     srv,
 		FullMethod: "/EZCaptchaService/GetCaptcha",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(EZCaptchaServiceServer).GetCaptcha(ctx, req.(*EZCaptchaEmpty))
 	}
 	return interceptor(ctx, in, info, handler)

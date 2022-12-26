@@ -58,7 +58,7 @@ func startGRPCClient() {
 		}
 	}
 }
-func Log(level LogLv, msg ...interface{}) {
+func Log(level LogLv, msg ...any) {
 	if level < logLevel {
 		return
 	}
@@ -72,7 +72,7 @@ func Log(level LogLv, msg ...interface{}) {
 		Content:  fmt.Sprint(msg...),
 	}
 }
-func LogWithTag(level LogLv, tag string, msg ...interface{}) {
+func LogWithTag(level LogLv, tag string, msg ...any) {
 	if level < logLevel {
 		return
 	}

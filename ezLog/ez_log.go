@@ -117,56 +117,56 @@ func SetUpEnv(m *EZLoggerModel) {
 		}
 	}
 }
-func D(msg ...interface{}) {
+func D(msg ...any) {
 	Log(LogLvDebug, msg...)
 }
-func I(msg ...interface{}) {
+func I(msg ...any) {
 	Log(LogLvInfo, msg...)
 }
-func E(msg ...interface{}) {
+func E(msg ...any) {
 	Log(LogLvError, msg...)
 }
-func DingMessage(msg ...interface{}) {
+func DingMessage(msg ...any) {
 	Log(LogLvDingMessage, msg...)
 	if enableDing {
 		sendToDing(LogLvDingMessage, "no tag", fmt.Sprintln(msg...))
 	}
 }
-func DingAtAll(msg ...interface{}) {
+func DingAtAll(msg ...any) {
 	Log(LogLvDingAll, msg...)
 	if enableDing {
 		sendToDing(LogLvDingAll, "no tag", fmt.Sprintln(msg...))
 	}
 }
-func DingList(msg ...interface{}) {
+func DingList(msg ...any) {
 	Log(LogLvDingLists, msg...)
 	if enableDing {
 		sendToDing(LogLvDingLists, "no tag", fmt.Sprintln(msg...))
 	}
 }
 
-func DWithTag(tag string, msg ...interface{}) {
+func DWithTag(tag string, msg ...any) {
 	LogWithTag(LogLvDebug, tag, msg...)
 }
-func IWithTag(tag string, msg ...interface{}) {
+func IWithTag(tag string, msg ...any) {
 	LogWithTag(LogLvInfo, tag, msg...)
 }
-func EWithTag(tag string, msg ...interface{}) {
+func EWithTag(tag string, msg ...any) {
 	LogWithTag(LogLvError, tag, msg...)
 }
-func DingMessageWithTag(tag string, msg ...interface{}) {
+func DingMessageWithTag(tag string, msg ...any) {
 	LogWithTag(LogLvDingMessage, tag, msg...)
 	if enableDing {
 		sendToDing(LogLvDingMessage, tag, fmt.Sprintln(msg...))
 	}
 }
-func DingAtAllWithTag(tag string, msg ...interface{}) {
+func DingAtAllWithTag(tag string, msg ...any) {
 	LogWithTag(LogLvDingAll, tag, msg...)
 	if enableDing {
 		sendToDing(LogLvDingAll, tag, fmt.Sprintln(msg...))
 	}
 }
-func DingListWithTag(tag string, msg ...interface{}) {
+func DingListWithTag(tag string, msg ...any) {
 	LogWithTag(LogLvDingLists, tag, msg...)
 	if enableDing {
 		sendToDing(LogLvDingLists, tag, fmt.Sprintln(msg...))
