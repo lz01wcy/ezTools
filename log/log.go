@@ -6,6 +6,7 @@ import (
 	"github.com/Anveena/ezTools/password"
 	_ "github.com/go-sql-driver/mysql"
 	"strings"
+	"time"
 )
 
 type LogLv int32
@@ -113,7 +114,12 @@ func SetUpEnv(m *EZLoggerModel) {
 			panic(fmt.Sprintf("获取密码错误:%s", err.Error()))
 		}
 		for i := 0; i < gRPCClientCounts; i++ {
-			go startGRPCClient()
+			go func() {
+				for {
+					startGRPCClient()
+					time.Sleep(5 * time.Second)
+				}
+			}()
 		}
 	}
 }
